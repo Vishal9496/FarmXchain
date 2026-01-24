@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="carrotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9933;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff6600;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Carrot body -->
+  <polygon points="100,40 130,140 70,140" fill="url(#carrotGradient)" />
+  <!-- Shine -->
+  <polygon points="95,60 110,120 90,120" fill="rgba(255,255,255,0.2)" />
+  <!-- Greens top -->
+  <ellipse cx="100" cy="35" rx="18" ry="12" fill="#22AA22" />
+  <path d="M 85 35 Q 70 20 65 10" stroke="#22AA22" stroke-width="4" fill="none" stroke-linecap="round" />
+  <path d="M 115 35 Q 130 20 135 10" stroke="#22AA22" stroke-width="4" fill="none" stroke-linecap="round" />
+  <path d="M 100 35 Q 95 15 90 5" stroke="#22AA22" stroke-width="4" fill="none" stroke-linecap="round" />
+</svg>

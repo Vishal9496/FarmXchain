@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="strawberryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff3333;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dd0000;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Strawberry body heart-like shape -->
+  <path d="M 100 150 Q 70 120 70 90 Q 70 60 85 50 Q 100 40 100 40 Q 100 40 115 50 Q 130 60 130 90 Q 130 120 100 150" fill="url(#strawberryGradient)" />
+  <!-- Seeds (yellow dots) -->
+  <circle cx="85" cy="75" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="95" cy="70" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="105" cy="70" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="115" cy="75" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="90" cy="95" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="100" cy="90" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="110" cy="95" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="85" cy="115" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="100" cy="120" r="4" fill="#ffff00" opacity="0.8" />
+  <circle cx="115" cy="115" r="4" fill="#ffff00" opacity="0.8" />
+  <!-- Green leafy top -->
+  <g fill="#22aa22">
+    <ellipse cx="80" cy="38" rx="8" ry="12" transform="rotate(-30 80 38)" />
+    <ellipse cx="100" cy="32" rx="8" ry="12" />
+    <ellipse cx="120" cy="38" rx="8" ry="12" transform="rotate(30 120 38)" />
+  </g>
+  <!-- Shine -->
+  <ellipse cx="85" cy="80" rx="12" ry="20" fill="rgba(255,255,255,0.2)" />
+</svg>

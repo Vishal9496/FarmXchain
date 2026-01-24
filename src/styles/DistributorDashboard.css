@@ -1,0 +1,576 @@
+/* === Distributor Dashboard - Theme-Aware Styles === */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+.distributor-dashboard {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: "Inter", sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+  padding: 2rem 0;
+}
+
+/* === Header Section === */
+.distributor-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.distributor-header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Hide any header logo while leaving the title text intact */
+.distributor-header-container img,
+.distributor-header-container svg {
+  display: none;
+}
+
+.distributor-header h1::before {
+  display: none;
+  content: none;
+}
+
+.distributor-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.distributor-header p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Light theme text legibility scoped to Distributor Dashboard */
+html[data-theme="light"] .distributor-dashboard .stat-card,
+html[data-theme="light"] .distributor-dashboard .analytics-card,
+html[data-theme="light"] .distributor-dashboard .dashboard-table-container,
+html[data-theme="light"] .distributor-dashboard .empty-state {
+  color: var(--text-primary);
+}
+
+html[data-theme="light"] .distributor-dashboard .stat-label,
+html[data-theme="light"] .distributor-dashboard .table-muted,
+html[data-theme="light"] .distributor-dashboard .analytics-label,
+html[data-theme="light"] .distributor-dashboard .empty-state-text,
+html[data-theme="light"] .distributor-dashboard .dashboard-table th {
+  color: var(--text-secondary);
+}
+
+html[data-theme="light"] .distributor-dashboard .stat-value,
+html[data-theme="light"] .distributor-dashboard .table-id,
+html[data-theme="light"] .distributor-dashboard .analytics-value,
+html[data-theme="light"] .distributor-dashboard .dashboard-table td {
+  color: var(--text-heading);
+}
+
+/* === Main Content Layout === */
+.distributor-main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* === Stats Grid Section === */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+/* FIXED: Improved stat card styling with better spacing, shadows, and hierarchy */
+.stat-card {
+  background: var(--bg-card);
+  border-radius: 0.875rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* === Tabs Section === */
+.dashboard-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: var(--text-heading);
+  background: var(--bg-light);
+}
+
+.tab-button.active {
+  color: var(--primary-green);
+  border-bottom-color: var(--primary-green);
+}
+
+/* === Table Container === */
+.dashboard-table-container {
+  background: var(--bg-card);
+  border-radius: 0.875rem;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+/* FIXED: Improved table layout with proper alignment, padding, and visual hierarchy */
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.dashboard-table thead {
+  background: var(--bg-light);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.dashboard-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--bg-light);
+}
+
+.dashboard-table td {
+  padding: 1.25rem 1.25rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.dashboard-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.dashboard-table tbody tr:hover {
+  background: var(--bg-light);
+}
+
+.dashboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Table cell type-specific styles */
+.table-id {
+  font-weight: 600;
+  color: var(--text-heading);
+  font-family: "Monaco", "Courier New", monospace;
+  font-size: 0.85rem;
+}
+
+.table-muted {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* === Status Badge Styling === */
+.status-badge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: var(--bg-light);
+  color: var(--text-heading);
+}
+
+.status-processing {
+  background: var(--bg-secondary);
+  color: var(--info);
+}
+
+.status-shipped {
+  background: var(--bg-secondary);
+  color: var(--text-heading);
+}
+
+.status-fulfilled {
+  background: var(--primary-green-light);
+  color: var(--primary-green);
+}
+
+/* === Action Button Styling === */
+.action-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: var(--shadow-sm);
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+/* FIXED: Improved button styling for better visibility and consistency */
+.btn-process {
+  background: var(--bg-light);
+  color: var(--info);
+}
+
+.btn-process:hover {
+  background: var(--bg-secondary);
+}
+
+.btn-ship {
+  background: var(--bg-secondary);
+  color: var(--text-heading);
+}
+
+.btn-ship:hover {
+  background: var(--bg-light);
+}
+
+.btn-fulfill {
+  background: var(--primary-green-light);
+  color: var(--primary-green);
+}
+
+.btn-fulfill:hover {
+  background: var(--primary-green);
+  color: var(--bg-card);
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--bg-light);
+  border-radius: 0.875rem;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: var(--border-hover);
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-state-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* === Analytics Grid Section === */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* FIXED: Improved analytics card styling for visual consistency */
+.analytics-card {
+  background: var(--bg-card);
+  border-radius: 0.875rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.analytics-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.analytics-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.analytics-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.analytics-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* === Responsive Design === */
+@media (max-width: 1024px) {
+  .distributor-main {
+    padding: 0 1.5rem;
+  }
+
+  .distributor-header-container {
+    padding: 0 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .dashboard-table {
+    font-size: 0.85rem;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 0.875rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .distributor-dashboard {
+    padding: 1rem 0;
+  }
+
+  .distributor-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .distributor-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .distributor-main {
+    padding: 0 1rem;
+  }
+
+  .distributor-header-container {
+    padding: 0 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .dashboard-tabs {
+    gap: 0;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .tab-button {
+    padding: 0.875rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .dashboard-table {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-table th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .dashboard-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .action-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .analytics-card {
+    padding: 1.25rem;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.625rem;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .distributor-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .distributor-header p {
+    font-size: 0.85rem;
+  }
+
+  .stats-grid {
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-tabs {
+    gap: 0;
+  }
+
+  .tab-button {
+    padding: 0.75rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .dashboard-table-container {
+    border-radius: 0.5rem;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 0.5rem;
+  }
+
+  .table-id,
+  .table-muted {
+    font-size: 0.75rem;
+  }
+
+  .action-btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.65rem;
+  }
+}

@@ -1,0 +1,297 @@
+/* === Unauthorized Page - Professional Error Layout === */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* FIXED: Main wrapper - centers content both vertically and horizontally */
+.unauthorized-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 2rem;
+  font-family: "Inter", sans-serif;
+}
+
+/* FIXED: Container for proper max-width and spacing */
+.unauthorized-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* FIXED: Icon container with professional styling */
+.unauthorized-icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.unauthorized-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dc2626;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+  animation: subtle-bounce 3s ease-in-out infinite;
+}
+
+@keyframes subtle-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* FIXED: Clean card layout with proper shadow and border */
+.unauthorized-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  width: 100%;
+}
+
+/* FIXED: Improved typography - strong visual hierarchy */
+.unauthorized-heading {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.02em;
+}
+
+.unauthorized-subtext {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.unauthorized-description {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 2rem 0;
+  line-height: 1.7;
+}
+
+/* FIXED: Button actions container */
+.unauthorized-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* FIXED: Improved button styling with proper hierarchy and contrast */
+.unauthorized-btn {
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+  font-family: "Inter", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.unauthorized-btn:active {
+  transform: scale(0.98);
+}
+
+/* Primary button - prominent CTA */
+.unauthorized-btn-primary {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+}
+
+.unauthorized-btn-primary:hover {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Secondary button - less prominent */
+.unauthorized-btn-secondary {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 2px solid #e2e8f0;
+}
+
+.unauthorized-btn-secondary:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+/* FIXED: Error code footer - secondary information */
+.unauthorized-code {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+/* === Dark Mode Support === */
+@media (prefers-color-scheme: dark) {
+  .unauthorized-wrapper {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .unauthorized-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .unauthorized-heading {
+    color: #f1f5f9;
+  }
+
+  .unauthorized-subtext {
+    color: #cbd5e1;
+  }
+
+  .unauthorized-description {
+    color: #94a3b8;
+  }
+
+  .unauthorized-btn-secondary {
+    background: #334155;
+    color: #f1f5f9;
+    border-color: #475569;
+  }
+
+  .unauthorized-btn-secondary:hover {
+    background: #475569;
+    border-color: #64748b;
+  }
+
+  .unauthorized-code {
+    color: #64748b;
+  }
+
+  .unauthorized-icon {
+    background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%);
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.25);
+  }
+}
+
+/* === Responsive Design === */
+@media (max-width: 640px) {
+  .unauthorized-wrapper {
+    padding: 1.5rem;
+  }
+
+  .unauthorized-container {
+    gap: 1.5rem;
+  }
+
+  .unauthorized-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .unauthorized-heading {
+    font-size: 1.75rem;
+  }
+
+  .unauthorized-subtext {
+    font-size: 1rem;
+  }
+
+  .unauthorized-description {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .unauthorized-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .unauthorized-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .unauthorized-actions {
+    gap: 0.75rem;
+  }
+
+  .unauthorized-btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .unauthorized-card {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .unauthorized-heading {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .unauthorized-subtext {
+    font-size: 0.95rem;
+  }
+
+  .unauthorized-description {
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .unauthorized-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .unauthorized-icon {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+/* === Accessibility Improvements === */
+.unauthorized-btn:focus-visible {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+}
+
+.unauthorized-btn-secondary:focus-visible {
+  outline: 2px solid #1e293b;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .unauthorized-icon {
+    animation: none;
+  }
+
+  .unauthorized-btn {
+    transition: none;
+  }
+}

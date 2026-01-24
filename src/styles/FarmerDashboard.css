@@ -1,0 +1,121 @@
+/* === Farmer Dashboard - Green Farming Theme === */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
+
+:root {
+  --farmer-primary: #16a34a;
+  --farmer-secondary: #22c55e;
+  --farmer-accent: #4ade80;
+  --farmer-dark: #14532d;
+  --farmer-light: #15803d;
+  --farmer-bg: #dcfce7;
+  --farmer-card: #ffffff;
+  --farmer-border: #bbf7d0;
+}
+
+.farmer-dashboard {
+  font-family: "Inter", sans-serif;
+  padding: 30px;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #86efac 100%);
+  min-height: 100vh;
+  color: var(--farmer-dark);
+}
+
+.farmer-header {
+  background: var(--farmer-card);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+  margin-bottom: 30px;
+  border-left: 5px solid var(--farmer-primary);
+}
+
+.farmer-header h1 {
+  color: var(--farmer-dark);
+  font-family: "Playfair Display", serif;
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+}
+
+.farmer-header p {
+  color: var(--farmer-light);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.farmer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.farmer-card {
+  background: var(--farmer-card);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid var(--farmer-border);
+}
+
+.farmer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.2);
+  border-color: var(--farmer-primary);
+}
+
+.btn-farmer-primary {
+  background: linear-gradient(
+    135deg,
+    var(--farmer-primary),
+    var(--farmer-secondary)
+  );
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-farmer-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+}
+
+.farmer-stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.stat-box {
+  flex: 1;
+  min-width: 150px;
+  background: linear-gradient(
+    135deg,
+    var(--farmer-primary),
+    var(--farmer-secondary)
+  );
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.stat-box h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.stat-box p {
+  margin: 8px 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}

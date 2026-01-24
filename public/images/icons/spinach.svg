@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="spinachGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#33aa33;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a6d1a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Spinach leaf layers -->
+  <path d="M 100 40 Q 130 70 120 130 Q 100 150 80 130 Q 70 70 100 40" fill="url(#spinachGradient)" />
+  <!-- Secondary leaves -->
+  <path d="M 85 80 Q 60 100 65 140" stroke="#22aa22" stroke-width="18" fill="none" stroke-linecap="round" opacity="0.8" />
+  <path d="M 115 80 Q 140 100 135 140" stroke="#22aa22" stroke-width="18" fill="none" stroke-linecap="round" opacity="0.8" />
+  <!-- Vein detail -->
+  <path d="M 100 50 Q 100 90 100 140" stroke="#1a6d1a" stroke-width="2" opacity="0.5" />
+  <!-- Left vein -->
+  <path d="M 85 75 Q 70 100 75 130" stroke="#1a6d1a" stroke-width="1.5" opacity="0.5" />
+  <!-- Right vein -->
+  <path d="M 115 75 Q 130 100 125 130" stroke="#1a6d1a" stroke-width="1.5" opacity="0.5" />
+  <!-- Shine -->
+  <ellipse cx="90" cy="85" rx="12" ry="25" fill="rgba(255,255,255,0.15)" />
+</svg>

@@ -1,0 +1,77 @@
+############################
+# OS files
+############################
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+
+############################
+# IDEs & Editors
+############################
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+
+############################
+# Frontend (Node / React)
+############################
+node_modules/
+build/
+dist/
+coverage/
+*.log
+
+
+############################
+# Environment files (SECRETS)
+############################
+.env
+.env.*
+*.env.local
+*.env.development
+*.env.production
+
+
+############################
+# Backend (Java / Spring Boot)
+############################
+target/
+build/
+.gradle/
+*.class
+*.jar
+
+
+############################
+# Spring Boot secret configs
+# (ONLY secrets should be ignored)
+############################
+application-local.properties
+application-local.yml
+application-secrets.properties
+application-secrets.yml
+**/*.secrets.*
+**/*.secret.*
+
+
+############################
+# Database & runtime files
+############################
+*.db
+*.sqlite
+*.h2.db
+logs/
+
+
+############################
+# Temp & backup files
+############################
+*.tmp
+*.bak
+*~

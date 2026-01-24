@@ -1,0 +1,179 @@
+/* === Professional Register Page - Light Theme === */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-app);
+  padding: var(--spacing-lg);
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 480px;
+}
+
+.auth-box {
+  background: var(--bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.auth-header h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: var(--spacing-sm);
+}
+
+.auth-header p {
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+}
+
+.input-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: var(--font-size-sm);
+}
+
+.input-group input,
+.input-group select,
+.password-input-container input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  color: var(--text-heading);
+  transition: all 0.2s ease;
+}
+
+.input-group select {
+  cursor: pointer;
+}
+
+.input-group input::placeholder,
+.password-input-container input::placeholder {
+  color: var(--text-muted);
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.password-input-container input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 3px var(--accent-green);
+}
+
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-container input {
+  padding-right: 3rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: var(--text-body);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: var(--primary-green);
+  color: white;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xl);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-green-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.switch-link a {
+  color: var(--primary-green);
+  font-weight: 600;
+}
+
+.switch-link a:hover {
+  color: var(--primary-green-hover);
+  text-decoration: underline;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 640px) {
+  .auth-box {
+    padding: var(--spacing-xl);
+  }
+
+  .auth-header h2 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

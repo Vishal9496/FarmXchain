@@ -1,0 +1,112 @@
+/* Global Theme Variables */
+:root[data-theme="light"] {
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-card: #ffffff;
+  --bg-light: #f3f4f6; /* gray-100 for secondary buttons */
+  --bg-white: #ffffff;
+  --bg-gray: #e5e7eb; /* gray-300 */
+  --bg-gradient: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #86efac 100%);
+
+  /* Text Colors */
+  --text-primary: #111827; /* gray-900 */
+  --text-secondary: #6b7280; /* gray-600 */
+  --text-heading: #1f2937; /* gray-800 */
+  --text-muted: #9ca3af; /* gray-400 */
+  --text-body: #374151; /* gray-700 */
+  --text-dark: #111827; /* for strong labels */
+
+  /* Border Colors */
+  --border-color: #e5e7eb;
+  --border-hover: #d1d5db;
+
+  /* Primary Green */
+  --primary-green: #10b981;
+  --primary-green-hover: #059669;
+  --primary-green-light: #d1fae5;
+
+  /* Status Colors */
+  --error: #dc2626; /* red-600 */
+  --info: #3b82f6; /* blue-500 */
+  --accent-green: #d1fae5;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] {
+  /* Background Colors */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-light: #334155; /* slate-700 for secondary buttons */
+  --bg-white: #1e293b;
+  --bg-gray: #475569; /* slate-600 */
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+
+  /* Text Colors (WCAG-friendly per request) */
+  --text-primary: #e5e7eb; /* gray-200 */
+  --text-secondary: #9ca3af; /* gray-400 */
+  --text-heading: #e5e7eb; /* align headings with primary */
+  --text-muted: #6b7280; /* gray-600 for helper/IDs */
+  --text-body: #9ca3af; /* secondary for body content */
+  --text-dark: #e5e7eb; /* strong labels use primary */
+
+  /* Border Colors */
+  --border-color: #334155;
+  --border-hover: #475569;
+
+  /* Primary Green */
+  --primary-green: #10b981;
+  --primary-green-hover: #34d399;
+  --primary-green-light: #064e3b;
+
+  /* Status Colors */
+  --error: #ef4444; /* red-500 lighter for dark mode */
+  --info: #60a5fa; /* blue-400 lighter for dark mode */
+  --accent-green: #064e3b;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Common Variables */
+:root {
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2rem;
+}
+
+/* Apply theme to body */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

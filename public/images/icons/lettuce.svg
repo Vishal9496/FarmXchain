@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="lettuceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#66dd00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22aa22;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Lettuce leaves layered -->
+  <ellipse cx="100" cy="100" rx="60" ry="65" fill="url(#lettuceGradient)" />
+  <ellipse cx="85" cy="85" rx="50" ry="55" fill="#44cc44" opacity="0.7" />
+  <ellipse cx="115" cy="85" rx="50" ry="55" fill="#44cc44" opacity="0.7" />
+  <!-- Wavy edges left -->
+  <path d="M 45 100 Q 35 85 40 70 Q 50 60 60 75" stroke="#22aa22" stroke-width="3" fill="none" opacity="0.6" />
+  <!-- Wavy edges right -->
+  <path d="M 155 100 Q 165 85 160 70 Q 150 60 140 75" stroke="#22aa22" stroke-width="3" fill="none" opacity="0.6" />
+  <!-- Center highlight -->
+  <ellipse cx="100" cy="110" rx="25" ry="30" fill="rgba(255,255,255,0.15)" />
+</svg>
