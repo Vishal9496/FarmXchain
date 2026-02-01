@@ -96,23 +96,30 @@ const RetailerDashboard = () => {
     fetchProducts();
   }, []);
 
-  // Function to safely get orders from local storage
-  const getOrdersFromStorage = (key) => {
-    return JSON.parse(localStorage.getItem(key) || "[]");
-  };
-
+  // ✅ Fetch retailer orders from backend
   useEffect(() => {
-    const loadAllOrders = () => {
-      setOrderHistory(getOrdersFromStorage("retailerOrders"));
-      setCustomerOrders(getOrdersFromStorage("customerOrders"));
-    };
-    loadAllOrders();
+    const fetchRetailerOrders = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setOrderHistory([]);
+          return;
+        }
 
-    const handleStorageChange = () => {
-      loadAllOrders();
+        const response = await axiosInstance.get("/api/orders/retailer", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setOrderHistory(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch retailer orders:", error);
+        setOrderHistory([]);
+      }
     };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+
+    fetchRetailerOrders();
   }, []);
 
   const addToCart = (product) => {
@@ -122,8 +129,8 @@ const RetailerDashboard = () => {
         cart.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
+            : item,
+        ),
       );
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
@@ -142,36 +149,23 @@ const RetailerDashboard = () => {
     } else {
       setCart(
         cart.map((item) =>
-          item.id === productId ? { ...item, quantity: newQuantity } : item
-        )
+          item.id === productId ? { ...item, quantity: newQuantity } : item,
+        ),
       );
     }
   };
 
+  // ❌ REMOVED: Retailers don't place orders - they receive orders from customers
+  // Orders are automatically created when customers checkout products from this retailer
   const placeOrder = () => {
-    if (cart.length === 0) {
-      alert("Cart is empty!");
-      return;
-    }
-
-    const newOrder = {
-      id: Date.now(),
-      items: cart.map(({ id, name, quantity }) => ({ id, name, quantity })),
-      total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      date: new Date().toLocaleDateString(),
-      status: "Pending",
-    };
-
-    const updatedOrders = [...orderHistory, newOrder];
-    localStorage.setItem("retailerOrders", JSON.stringify(updatedOrders));
-    setOrderHistory(updatedOrders);
-    setCart([]);
-    alert("Order placed successfully!");
+    alert(
+      "Retailers receive orders from customers. Orders appear automatically when customers checkout your products.",
+    );
   };
 
   const cartTotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
-    0
+    0,
   );
 
   // USD to INR conversion rate for retailer totals (env override supported)
@@ -232,8 +226,8 @@ const RetailerDashboard = () => {
                 activeTab === tab.id
                   ? "text-emerald-600 border-emerald-600"
                   : isDark
-                  ? "text-slate-400 border-transparent hover:text-slate-300"
-                  : "text-gray-600 border-transparent hover:text-gray-900"
+                    ? "text-slate-400 border-transparent hover:text-slate-300"
+                    : "text-gray-600 border-transparent hover:text-gray-900"
               }`}
             >
               {tab.label}
@@ -655,7 +649,7 @@ const RetailerDashboard = () => {
                         >
                           {(() => {
                             const inrTotal = Math.round(
-                              Number(order.total || 0) * usdToInrRate
+                              Number(order.total || 0) * usdToInrRate,
                             );
                             // Display IN₹ integer for retailer orders (USD->INR conversion)
                             return `₹${inrTotal}`;
@@ -676,12 +670,12 @@ const RetailerDashboard = () => {
                                   ? "bg-yellow-900/40 text-yellow-300"
                                   : "bg-yellow-100 text-yellow-900"
                                 : order.status === "Shipped"
-                                ? isDark
-                                  ? "bg-blue-900/40 text-blue-300"
-                                  : "bg-blue-100 text-blue-900"
-                                : isDark
-                                ? "bg-green-900/40 text-green-300"
-                                : "bg-green-100 text-green-900"
+                                  ? isDark
+                                    ? "bg-blue-900/40 text-blue-300"
+                                    : "bg-blue-100 text-blue-900"
+                                  : isDark
+                                    ? "bg-green-900/40 text-green-300"
+                                    : "bg-green-100 text-green-900"
                             }`}
                           >
                             {order.status}

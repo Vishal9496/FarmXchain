@@ -17,21 +17,36 @@ const DistributorDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const { isDark } = useTheme();
 
-  // Load orders from localStorage
+  // ✅ Fetch distributor orders from backend
   useEffect(() => {
-    const loadOrders = () => {
-      const retailerOrders = JSON.parse(
-        localStorage.getItem("retailerOrders") || "[]"
-      );
-      setOrders(retailerOrders);
-    };
-    loadOrders();
+    const fetchDistributorOrders = async () => {
+      try {
+        if (!isTokenValid()) {
+          setOrders([]);
+          return;
+        }
 
-    const handleStorageChange = (e) => {
-      if (e.key === "retailerOrders") loadOrders();
+        const response = await fetch(
+          "http://localhost:8080/api/orders/distributor",
+          {
+            headers: getAuthHeaders(),
+          },
+        );
+
+        if (!response.ok) {
+          setOrders([]);
+          return;
+        }
+
+        const data = await response.json();
+        setOrders(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to fetch distributor orders:", error);
+        setOrders([]);
+      }
     };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+
+    fetchDistributorOrders();
   }, []);
 
   // Load inventory from backend for the authenticated retailer/distributor
@@ -46,7 +61,7 @@ const DistributorDashboard = () => {
           "http://localhost:8080/api/products/retailer/inventory",
           {
             headers: getAuthHeaders(),
-          }
+          },
         );
         if (!resp.ok) {
           setInventory([]);
@@ -71,33 +86,76 @@ const DistributorDashboard = () => {
     fetchInventory();
   }, []);
 
-  const updateOrderStatus = (orderId, newStatus) => {
-    const updatedOrders = orders.map((order) =>
-      order.id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
-    localStorage.setItem("retailerOrders", JSON.stringify(updatedOrders));
+  // ✅ Update order status via backend API
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      if (!isTokenValid()) {
+        alert("Please login to update order status");
+        return;
+      }
+
+      let endpoint;
+      if (newStatus === "Shipped") {
+        endpoint = `http://localhost:8080/api/orders/${orderId}/ship`;
+      } else if (newStatus === "Fulfilled") {
+        endpoint = `http://localhost:8080/api/orders/${orderId}/deliver`;
+      } else {
+        // Processing or other states not handled by backend yet
+        return;
+      }
+
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(
+          `Failed to update order: ${errorData.message || "Unknown error"}`,
+        );
+        return;
+      }
+
+      // Refresh orders after successful update
+      const ordersResponse = await fetch(
+        "http://localhost:8080/api/orders/distributor",
+        {
+          headers: getAuthHeaders(),
+        },
+      );
+      const data = await ordersResponse.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      alert("Failed to update order status");
+    }
   };
 
-  const handleReceiveOrder = (orderId) => {
+  const handleReceiveOrder = async (orderId) => {
     const order = orders.find((o) => o.id === orderId);
     if (!order) return;
 
-    order.items.forEach((item) => {
-      const existingItem = inventory.find((inv) => inv.product === item.name);
+    // Update inventory locally (backend doesn't track distributor inventory yet)
+    order.items?.forEach((item) => {
+      const existingItem = inventory.find(
+        (inv) => inv.product === item.productName,
+      );
       if (existingItem) {
         const currentQty = parseInt(existingItem.quantity);
         const newQty = currentQty - item.quantity;
         setInventory((prevInventory) =>
           prevInventory.map((inv) =>
-            inv.product === item.name
+            inv.product === item.productName
               ? { ...inv, quantity: `${newQty}kg` }
-              : inv
-          )
+              : inv,
+          ),
         );
       }
     });
-    updateOrderStatus(orderId, "Fulfilled");
+
+    // Update order status via backend
+    await updateOrderStatus(orderId, "Fulfilled");
   };
 
   const stats = [
@@ -246,7 +304,7 @@ const DistributorDashboard = () => {
                         <td className="table-id">
                           {(() => {
                             const inrTotal = Math.round(
-                              Number(order.total || 0) * usdToInrRate
+                              Number(order.total || 0) * usdToInrRate,
                             );
                             // Display INR integer for distributor orders (USD->INR conversion)
                             return `₹${inrTotal}`;
@@ -370,8 +428,8 @@ const DistributorDashboard = () => {
                     const pricePerKg = item.product.includes("Tomatoes")
                       ? 2.5
                       : item.product.includes("Peppers")
-                      ? 3.0
-                      : 1.8;
+                        ? 3.0
+                        : 1.8;
                     return sum + parseInt(item.quantity) * pricePerKg;
                   }, 0);
                   const inrValue = Math.round(usdTotal * 82);
@@ -393,7 +451,7 @@ const DistributorDashboard = () => {
                   ? Math.round(
                       (orders.filter((o) => o.status === "Fulfilled").length /
                         orders.length) *
-                        100
+                        100,
                     )
                   : 0}
                 %

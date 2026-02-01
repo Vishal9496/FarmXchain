@@ -234,12 +234,42 @@ const CustomerDashboard = () => {
     );
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) return;
-    alert(
-      "Order placed successfully! 🎉\n\nYour fresh produce will be delivered soon.\nTrack your order from farm to door.",
-    );
-    setCart([]);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please login to place an order");
+        return;
+      }
+
+      const response = await axiosInstance.post(
+        "/api/orders",
+        {
+          items: cart.map((item) => ({
+            productId: item.id,
+            quantity: item.quantity,
+          })),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      alert(
+        "Order placed successfully! 🎉\n\nYour fresh produce will be delivered soon.\nTrack your order from farm to door.",
+      );
+      setCart([]);
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to place order";
+      alert(`Order failed: ${errorMessage}`);
+    }
   };
 
   // ✅ Calculate cart total in INR (USD prices * 83)
