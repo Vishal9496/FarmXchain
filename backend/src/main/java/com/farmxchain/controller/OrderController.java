@@ -132,10 +132,15 @@ public class OrderController {
             System.out.println("[OrderController] Processing " + request.items.size() + " items");
 
             // ✅ TRANSACTIONAL: Create order via service
-            Order order = orderService.createOrderFromCheckout(
-                    customer,
-                    request.items
-            );
+          List<OrderService.CheckoutItem> serviceItems = request.items.stream()
+        .map(i -> new OrderService.CheckoutItem(i.productId, i.quantity))
+        .collect(Collectors.toList());
+
+Order order = orderService.createOrderFromCheckout(
+        customer,
+        serviceItems
+);
+
 
             System.out.println("[OrderController] Order created: " + order.getId());
 

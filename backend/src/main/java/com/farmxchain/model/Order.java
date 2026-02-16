@@ -265,14 +265,3 @@ public class Order {
     }
 }
 
-/**
- * ✅ ORDER LIFECYCLE STATES
- */
-enum OrderStatus {
-    PLACED,      // Customer submitted order
-    CONFIRMED,   // Retailer confirmed order
-    PACKED,      // Order packed and ready for shipment (distributor assigned here)
-    SHIPPED,     // Distributor shipped order
-    DELIVERED,   // Customer received order
-    CANCELLED    // Order was cancelled
-}
