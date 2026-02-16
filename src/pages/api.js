@@ -30,7 +30,7 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // ✅ Attach token to PRODUCTS_API as well
@@ -42,7 +42,7 @@ PRODUCTS_API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Login function (uses API)
@@ -77,6 +77,8 @@ export const loginUser = async (email, password, role) => {
     const { user, token } = response.data;
 
     if (!user || !token) throw new Error("Invalid login response");
+
+    localStorage.setItem("token", token);
 
     const userWithToken = { ...user, token };
     localStorage.setItem("user", JSON.stringify(userWithToken));
@@ -149,7 +151,7 @@ export const getRetailerInventory = async () => {
     return response.data;
   } catch (err) {
     throw new Error(
-      err.response?.data?.message || "Failed to fetch retailer inventory"
+      err.response?.data?.message || "Failed to fetch retailer inventory",
     );
   }
 };
@@ -167,7 +169,7 @@ export const getFarmerProducts = async (farmerId) => {
       : response.data.products || [];
   } catch (err) {
     throw new Error(
-      err.response?.data?.message || "Failed to fetch farmer products"
+      err.response?.data?.message || "Failed to fetch farmer products",
     );
   }
 };
@@ -198,7 +200,7 @@ export const getAvailableProductsForCustomers = async () => {
     console.log("[API] /customer/products response data:", response.data);
     console.log(
       "[API] /customer/products response length:",
-      Array.isArray(response.data) ? response.data.length : "not an array"
+      Array.isArray(response.data) ? response.data.length : "not an array",
     );
     if (Array.isArray(response.data)) {
       return response.data;
@@ -208,7 +210,7 @@ export const getAvailableProductsForCustomers = async () => {
   } catch (err) {
     console.error("[API] /customer/products error:", err);
     throw new Error(
-      err.response?.data?.message || "Failed to fetch available products"
+      err.response?.data?.message || "Failed to fetch available products",
     );
   }
 };
