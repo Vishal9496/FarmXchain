@@ -1,0 +1,22 @@
+.   ____          _            __ _ _
+ /\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot :: (v3.5.5)
+
+2026-02-16T14:13:54.307+05:30  INFO  Starting FarmxchainAuthApplication using Java 21.0.5
+2026-02-16T14:13:54.309+05:30  INFO  No active profile set, using default profile
+2026-02-16T14:13:55.107+05:30  INFO  Bootstrapping Spring Data JPA repositories
+2026-02-16T14:13:55.177+05:30  INFO  Found 5 JPA repository interfaces
+2026-02-16T14:13:55.721+05:30  INFO  Tomcat initialized with port 8080 (http)
+2026-02-16T14:13:55.742+05:30  INFO  Starting Servlet engine: Apache Tomcat/10.1.44
+2026-02-16T14:13:55.802+05:30  INFO  Root WebApplicationContext initialized
+2026-02-16T14:13:56.086+05:30  INFO  Hibernate ORM core version 6.6.26.Final
+2026-02-16T14:13:56.483+05:30  INFO  HikariCP datasource FarmXChainHikari started
+2026-02-16T14:13:56.664+05:30  INFO  MySQL connection established successfully
+2026-02-16T14:13:57.861+05:30  INFO  JPA EntityManagerFactory initialized
+2026-02-16T14:14:00.138+05:30  INFO  Tomcat started on port 8080 with context path '/'
+2026-02-16T14:14:00.148+05:30  INFO  FarmxchainAuthApplication started successfully in 6.327 seconds
