@@ -8,7 +8,6 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [devLink, setDevLink] = useState("");
   const [error, setError] = useState("");
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -24,11 +23,10 @@ const ForgotPassword = () => {
     }
     setLoading(true);
     try {
-      const res = await requestPasswordReset(email);
+      await requestPasswordReset(email);
       setMessage("If this email is registered, a reset link has been sent.");
-      if (res?.resetLink) setDevLink(res.resetLink);
     } catch (e) {
-      // Always show generic success message to avoid enumeration
+      // Always show the same generic message to avoid user enumeration.
       setMessage("If this email is registered, a reset link has been sent.");
     } finally {
       setLoading(false);
@@ -102,16 +100,17 @@ const ForgotPassword = () => {
             className={`mt-5 text-sm ${
               isDark ? "text-emerald-300" : "text-emerald-700"
             }`}
+            role="status"
           >
             {message}
-            {devLink && (
-              <div className="mt-2">
-                Dev link:{" "}
-                <a className="underline" href={devLink}>
-                  Open reset page
-                </a>
-              </div>
-            )}
+            <p
+              className={`mt-2 text-xs ${
+                isDark ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              The link expires in 15 minutes and can only be used once. Check
+              your spam folder if it does not arrive.
+            </p>
           </div>
         )}
 

@@ -1,5 +1,7 @@
 package com.farmxchain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -45,10 +47,28 @@ public class User {
         this.username = username;
     }
 
+    /**
+     * ✅ SECURITY (P0-3): {@code @JsonIgnore} on the GETTER makes the password WRITE-ONLY to
+     * Jackson. The BCrypt hash can never be serialised into an HTTP response, even if a future code
+     * path returns a raw User entity by mistake.
+     *
+     * <p>It is deliberately NOT placed on the field. A field-level {@code @JsonIgnore} suppresses
+     * BOTH directions, which would stop Jackson binding the password out of the login and
+     * registration request bodies and break authentication entirely. Annotating the getter with
+     * {@code @JsonIgnore} and the setter with {@code @JsonProperty} is Jackson's documented way to
+     * split a property into write-only.
+     */
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    /**
+     * ✅ SECURITY (P0-3): {@code @JsonProperty} re-enables DESERIALISATION only. Without it, Jackson
+     * would treat the whole property as ignored because of the annotation on the getter, and
+     * {@code @RequestBody User} in login/register would silently receive a null password.
+     */
+    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }

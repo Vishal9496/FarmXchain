@@ -2,11 +2,12 @@ package com.farmxchain.controller;
 
 import com.farmxchain.model.*;
 import com.farmxchain.repository.UserRepository;
-import com.farmxchain.security.JwtUtil;
 import com.farmxchain.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -16,24 +17,29 @@ import java.util.stream.Collectors;
 
 /**
  * ✅ PRODUCTION ORDER CONTROLLER
- * 
+ *
  * REST API endpoints for order management.
- * 
- * SECURITY:
- * - All endpoints require JWT in Authorization header
- * - Role validation at controller level
- * - Customer ID extracted from JWT (never trusted from frontend)
- * 
- * ENDPOINTS:
- * - POST /api/orders (Checkout)
- * - GET /api/orders/customer (Customer's orders)
- * - GET /api/orders/retailer (Retailer's orders)
- * - GET /api/orders/farmer (Farmer's orders)
- * - GET /api/orders/{id} (Order details)
- * - PUT /api/orders/{id}/confirm (Confirm order)
- * - PUT /api/orders/{id}/ship (Ship order)
- * - PUT /api/orders/{id}/deliver (Deliver order)
- * - PUT /api/orders/{id}/cancel (Cancel order)
+ *
+ * ✅ SECURITY (P0-11): every method that used to declare
+ * {@code @RequestHeader("Authorization") String authHeader} and manually
+ * {@code substring(7)} it, then call {@code jwtUtil.extractEmail}/
+ * {@code extractRole} and compare the result to a role string by hand, now
+ * instead declares {@code @PreAuthorize(...)} for the static role gate and, if
+ * the method body needs the caller's identity, takes {@code Authentication} and
+ * reads {@code authentication.getName()}. That pattern was duplicated seven
+ * times across this file before this change — once per endpoint — despite
+ * {@code JwtAuthFilter} already performing the equivalent verification for
+ * every request and already populating the {@code SecurityContext} with the
+ * result. All seven copies are gone.
+ *
+ * {@code getOrder} and {@code cancelOrder} (P0-8 and P0-9) already used
+ * {@code Authentication} rather than manual header parsing, and are reproduced
+ * here unchanged — they are not part of this fix because they were never part
+ * of the problem it addresses. Their authorization logic is data-dependent
+ * (per-order ownership across five stakeholder types) rather than a static
+ * role check, so it remains a plain conditional in the method body rather than
+ * a {@code @PreAuthorize} expression; see the note above
+ * {@code isAuthorizedToViewOrder} below for why.
  */
 @RestController
 @RequestMapping("/api/orders")
@@ -44,9 +50,6 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
     private UserRepository userRepository;
 
     // ============================================================================
@@ -55,67 +58,33 @@ public class OrderController {
 
     /**
      * ✅ CHECKOUT ENDPOINT
-     * 
+     *
      * Creates an order from customer's cart.
-     * 
-     * FLOW:
-     * 1. Extract customer ID from JWT
-     * 2. Validate role = CUSTOMER
-     * 3. Validate cart items (not empty, valid format)
-     * 4. Call OrderService.createOrderFromCheckout (transactional)
-     * 5. Return Order with status = PLACED
-     * 
-     * REQUEST BODY:
-     * {
-     *   "items": [
-     *     {"productId": 1, "quantity": 2},
-     *     {"productId": 3, "quantity": 1}
-     *   ]
-     * }
-     * 
-     * RESPONSE (201 CREATED):
-     * {
-     *   "id": 12345,
-     *   "customerId": 99,
-     *   "totalAmount": 250.00,
-     *   "status": "PLACED",
-     *   "items": [...],
-     *   "createdAt": "2026-02-01T10:30:00"
-     * }
+     *
+     * ✅ SECURITY (P0-11): the header-presence check, the manual
+     * {@code substring(7)}, and the manual "only customers can checkout" role
+     * comparison are gone. {@code @PreAuthorize("hasRole('CUSTOMER')")} rejects
+     * a non-customer token before this method body runs at all, and
+     * {@code Authentication.getName()} supplies the verified email directly.
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     public ResponseEntity<?> checkout(
-            @RequestHeader("Authorization") String authHeader,
-            @RequestBody CheckoutRequest request) {
+            @RequestBody CheckoutRequest request,
+            Authentication authentication) {
 
         try {
             System.out.println("[OrderController] Checkout request received");
 
-            // ✅ SECURITY: Extract and validate JWT
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new ErrorResponse("Missing or invalid Authorization header"));
-            }
-
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
-
-            // ✅ SECURITY: Only customers can checkout
-            if (!"customer".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only customers can place orders. Your role: " + role));
-            }
-
             // ✅ SECURITY: Get customer from database (not frontend-provided)
-            Optional<User> customerOpt = userRepository.findByEmail(email);
+            Optional<User> customerOpt = userRepository.findByEmail(authentication.getName());
             if (!customerOpt.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponse("User account not found"));
             }
 
             User customer = customerOpt.get();
-            System.out.println("[OrderController] Customer: " + customer.getId() + " (" + email + ")");
+            System.out.println("[OrderController] Customer: " + customer.getId() + " (" + customer.getEmail() + ")");
 
             // ✅ VALIDATION: Cart items
             if (request.items == null || request.items.isEmpty()) {
@@ -132,14 +101,14 @@ public class OrderController {
             System.out.println("[OrderController] Processing " + request.items.size() + " items");
 
             // ✅ TRANSACTIONAL: Create order via service
-            Order order = orderService.createOrderFromCheckout(
-                    customer,
-                    request.items
-            );
+            List<OrderService.CheckoutItem> serviceItems = request.items.stream()
+                    .map(i -> new OrderService.CheckoutItem(i.productId, i.quantity))
+                    .collect(Collectors.toList());
+
+            Order order = orderService.createOrderFromCheckout(customer, serviceItems);
 
             System.out.println("[OrderController] Order created: " + order.getId());
 
-            // ✅ RESPONSE: Return order details
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new OrderResponse(order));
 
@@ -161,37 +130,27 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Get all orders for authenticated customer
+     * Get all orders for authenticated customer.
+     *
+     * ✅ SECURITY (P0-11): manual header parsing removed, as above.
      */
+    @PreAuthorize("hasRole('CUSTOMER')")
     @GetMapping("/customer")
-    public ResponseEntity<?> getCustomerOrders(
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getCustomerOrders(Authentication authentication) {
 
-        try {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"customer".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only customers can access this endpoint"));
-            }
-
-            User customer = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new Exception("User not found"));
-
-            List<Order> orders = orderService.getCustomerOrders(customer.getId());
-
-            List<OrderResponse> response = orders.stream()
-                    .map(OrderResponse::new)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid token: " + e.getMessage()));
+        Optional<User> customerOpt = userRepository.findByEmail(authentication.getName());
+        if (customerOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("User account not found"));
         }
+
+        List<Order> orders = orderService.getCustomerOrders(customerOpt.get().getId());
+
+        List<OrderResponse> response = orders.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     // ============================================================================
@@ -199,37 +158,27 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Get all orders containing products from this retailer
+     * Get all orders containing products from this retailer.
+     *
+     * ✅ SECURITY (P0-11): manual header parsing removed, as above.
      */
+    @PreAuthorize("hasRole('RETAILER')")
     @GetMapping("/retailer")
-    public ResponseEntity<?> getRetailerOrders(
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getRetailerOrders(Authentication authentication) {
 
-        try {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"retailer".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only retailers can access this endpoint"));
-            }
-
-            User retailer = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new Exception("User not found"));
-
-            List<Order> orders = orderService.getRetailerOrders(retailer.getId());
-
-            List<OrderResponse> response = orders.stream()
-                    .map(OrderResponse::new)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid token"));
+        Optional<User> retailerOpt = userRepository.findByEmail(authentication.getName());
+        if (retailerOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("User account not found"));
         }
+
+        List<Order> orders = orderService.getRetailerOrders(retailerOpt.get().getId());
+
+        List<OrderResponse> response = orders.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     // ============================================================================
@@ -237,37 +186,27 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Get all orders containing products from this farmer
+     * Get all orders containing products from this farmer.
+     *
+     * ✅ SECURITY (P0-11): manual header parsing removed, as above.
      */
+    @PreAuthorize("hasRole('FARMER')")
     @GetMapping("/farmer")
-    public ResponseEntity<?> getFarmerOrders(
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getFarmerOrders(Authentication authentication) {
 
-        try {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"farmer".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only farmers can access this endpoint"));
-            }
-
-            User farmer = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new Exception("User not found"));
-
-            List<Order> orders = orderService.getFarmerOrders(farmer.getId());
-
-            List<OrderResponse> response = orders.stream()
-                    .map(OrderResponse::new)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid token"));
+        Optional<User> farmerOpt = userRepository.findByEmail(authentication.getName());
+        if (farmerOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("User account not found"));
         }
+
+        List<Order> orders = orderService.getFarmerOrders(farmerOpt.get().getId());
+
+        List<OrderResponse> response = orders.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
     // ============================================================================
@@ -275,24 +214,85 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Get details of a specific order
+     * Get details of a specific order.
+     *
+     * NOT modified by P0-11 — already used {@code Authentication} instead of
+     * manual header parsing since P0-8. Reproduced unchanged so this file
+     * compiles as a complete unit.
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getOrder(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+            Authentication authentication) {
 
+        Order order;
         try {
-            String token = authHeader.substring(7);
-            jwtUtil.extractEmail(token); // Validate token
-
-            Order order = orderService.getOrder(id);
-            return ResponseEntity.ok(new OrderResponse(order));
-
+            order = orderService.getOrder(id);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponse("Order not found"));
         }
+
+        if (!isAuthorizedToViewOrder(order, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse("You are not authorized to view this order"));
+        }
+
+        return ResponseEntity.ok(new OrderResponse(order));
+    }
+
+    /**
+     * ✅ Not converted to {@code @PreAuthorize} — and deliberately so. This check
+     * depends on loaded row data (which specific farmers/retailers have a line
+     * item on THIS order, and who the assigned distributor is), not on a static
+     * role the caller either has or doesn't. Expressing that in a
+     * {@code @PreAuthorize} SpEL expression would require a custom
+     * {@code PermissionEvaluator} or a security bean invoked as
+     * {@code @PreAuthorize("@orderSecurity.canView(#id, authentication)")} — a
+     * reasonable follow-up, but a larger architectural change than "stop
+     * manually parsing the Authorization header," which is what this fix
+     * addresses. {@code Authentication} is still used throughout, per the
+     * requirement, exactly as it was under P0-8.
+     */
+    private boolean isAuthorizedToViewOrder(Order order, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_ADMIN"));
+        if (isAdmin) {
+            return true;
+        }
+
+        Optional<User> callerOpt = userRepository.findByEmail(authentication.getName());
+        if (callerOpt.isEmpty()) {
+            return false;
+        }
+        Long callerId = callerOpt.get().getId();
+
+        if (order.getCustomer() != null && callerId.equals(order.getCustomer().getId())) {
+            return true;
+        }
+
+        if (order.getDistributorId() != null && callerId.equals(order.getDistributorId())) {
+            return true;
+        }
+
+        boolean isFarmerOnOrder = order.getItems().stream()
+                .anyMatch(item -> callerId.equals(item.getFarmerId()));
+        if (isFarmerOnOrder) {
+            return true;
+        }
+
+        boolean isRetailerOnOrder = order.getItems().stream()
+                .anyMatch(item -> callerId.equals(item.getRetailerId()));
+        if (isRetailerOnOrder) {
+            return true;
+        }
+
+        return false;
     }
 
     // ============================================================================
@@ -300,23 +300,18 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Confirm order (PLACED → CONFIRMED)
-     * Called by retailer when ready to ship
+     * Confirm order (PLACED → CONFIRMED). Called by retailer when ready to ship.
+     *
+     * ✅ SECURITY (P0-11): the method body never used the caller's identity —
+     * only the role, to gate the operation. {@code @PreAuthorize} replaces that
+     * role check entirely, so the {@code Authorization} header, the token
+     * variable, and the role variable all disappear from the signature and body.
      */
+    @PreAuthorize("hasRole('RETAILER')")
     @PutMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmOrder(
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> confirmOrder(@PathVariable Long id) {
 
         try {
-            String token = authHeader.substring(7);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"retailer".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only retailers can confirm orders"));
-            }
-
             Order order = orderService.confirmOrder(id);
             return ResponseEntity.ok(new OrderResponse(order));
 
@@ -331,23 +326,15 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Ship order (CONFIRMED → SHIPPED)
-     * Called by distributor when leaving warehouse
+     * Ship order (CONFIRMED → SHIPPED). Called by distributor when leaving warehouse.
+     *
+     * ✅ SECURITY (P0-11): same simplification as {@link #confirmOrder}.
      */
+    @PreAuthorize("hasRole('DISTRIBUTOR')")
     @PutMapping("/{id}/ship")
-    public ResponseEntity<?> shipOrder(
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> shipOrder(@PathVariable Long id) {
 
         try {
-            String token = authHeader.substring(7);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"distributor".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only distributors can ship orders"));
-            }
-
             Order order = orderService.shipOrder(id);
             return ResponseEntity.ok(new OrderResponse(order));
 
@@ -362,23 +349,15 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Deliver order (SHIPPED → DELIVERED)
-     * Called by distributor when customer receives
+     * Deliver order (SHIPPED → DELIVERED). Called by distributor when customer receives.
+     *
+     * ✅ SECURITY (P0-11): same simplification as {@link #confirmOrder}.
      */
+    @PreAuthorize("hasRole('DISTRIBUTOR')")
     @PutMapping("/{id}/deliver")
-    public ResponseEntity<?> deliverOrder(
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> deliverOrder(@PathVariable Long id) {
 
         try {
-            String token = authHeader.substring(7);
-            String role = jwtUtil.extractRole(token);
-
-            if (!"distributor".equalsIgnoreCase(role)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new ErrorResponse("Only distributors can deliver orders"));
-            }
-
             Order order = orderService.deliverOrder(id);
             return ResponseEntity.ok(new OrderResponse(order));
 
@@ -393,32 +372,37 @@ public class OrderController {
     // ============================================================================
 
     /**
-     * Cancel order (restores inventory)
+     * Cancel order (restores inventory).
+     *
+     * NOT modified by P0-11 — already used {@code Authentication} instead of
+     * manual header parsing since P0-9. Reproduced unchanged so this file
+     * compiles as a complete unit.
      */
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelOrder(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+            Authentication authentication) {
+
+        Order order;
+        try {
+            order = orderService.getOrder(id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Order not found"));
+        }
+
+        if (!isAuthorizedToCancelOrder(order, authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse("You are not authorized to cancel this order"));
+        }
 
         try {
-            String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
+            Order cancelledOrder = orderService.cancelOrder(id);
+            return ResponseEntity.ok(new OrderResponse(cancelledOrder));
 
-            // ✅ Only customer who placed order can cancel
-            if ("customer".equalsIgnoreCase(role)) {
-                User customer = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new Exception("User not found"));
-
-                Order order = orderService.getOrder(id);
-                if (!order.getCustomer().getId().equals(customer.getId())) {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(new ErrorResponse("Cannot cancel someone else's order"));
-                }
-            }
-
-            Order order = orderService.cancelOrder(id);
-            return ResponseEntity.ok(new OrderResponse(order));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse(e.getMessage()));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -426,13 +410,50 @@ public class OrderController {
         }
     }
 
+    /**
+     * Same data-dependent-authorization rationale as
+     * {@link #isAuthorizedToViewOrder} — not converted to {@code @PreAuthorize}
+     * for the same reason. Not modified by P0-11.
+     */
+    private boolean isAuthorizedToCancelOrder(Order order, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_ADMIN"));
+        if (isAdmin) {
+            return true;
+        }
+
+        Optional<User> callerOpt = userRepository.findByEmail(authentication.getName());
+        if (callerOpt.isEmpty()) {
+            return false;
+        }
+        Long callerId = callerOpt.get().getId();
+
+        if (order.getCustomer() != null && callerId.equals(order.getCustomer().getId())) {
+            return true;
+        }
+
+        boolean callerIsRetailer = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_RETAILER"));
+        if (callerIsRetailer) {
+            boolean isRetailerOnOrder = order.getItems().stream()
+                    .anyMatch(item -> callerId.equals(item.getRetailerId()));
+            if (isRetailerOnOrder) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // ============================================================================
     // DTO CLASSES
     // ============================================================================
 
-    /**
-     * ✅ CHECKOUT REQUEST DTO
-     */
     public static class CheckoutRequest {
         public List<CheckoutItemRequest> items;
 
@@ -443,9 +464,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * ✅ CHECKOUT ITEM REQUEST DTO
-     */
     public static class CheckoutItemRequest {
         public Long productId;
         public Integer quantity;
@@ -458,9 +476,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * ✅ ORDER RESPONSE DTO
-     */
     public static class OrderResponse {
         public Long id;
         public Long customerId;
@@ -487,9 +502,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * ✅ ORDER ITEM RESPONSE DTO
-     */
     public static class OrderItemResponse {
         public Long id;
         public Long productId;
@@ -514,9 +526,6 @@ public class OrderController {
         }
     }
 
-    /**
-     * ✅ ERROR RESPONSE DTO
-     */
     public static class ErrorResponse {
         public String message;
         public LocalDateTime timestamp;

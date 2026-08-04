@@ -8,6 +8,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { getRetailerInventory, getAllProducts } from "./api";
+import axios from "axios";
 import "../styles/RetailerDashboard.css";
 
 const RetailerDashboard = () => {
@@ -106,7 +107,7 @@ const RetailerDashboard = () => {
           return;
         }
 
-        const response = await axiosInstance.get("/api/orders/retailer", {
+        const response = await axios.get("/api/orders/retailer", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -30,7 +30,7 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // ✅ Attach token to PRODUCTS_API as well
@@ -42,12 +42,29 @@ PRODUCTS_API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
+/**
+ * ✅ SECURITY (P0-6): thrown when the backend cannot be reached at all.
+ *
+ * A dedicated error type so the UI can tell "the server is down" apart from
+ * "your credentials are wrong" and show the right message. It carries no
+ * authentication meaning whatsoever — if this is thrown, the caller is NOT
+ * logged in and no session has been created.
+ */
+export class NetworkError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "NetworkError";
+    this.isNetworkError = true;
+  }
+}
+
 // Login function (uses API)
-// ✅ SECURITY: Role is NOT sent to backend during login
-// Backend determines role from database and returns it in JWT
+// ✅ SECURITY (P0-6): there is NO offline/demo path. Authentication happens on the
+// server or it does not happen at all. If the backend is unreachable this function
+// THROWS — it never returns a user object and never writes to localStorage.
 export const loginUser = async (email, password, role) => {
   if (!email?.trim() || !password?.trim()) {
     throw new Error("Email and password are required");
@@ -59,41 +76,43 @@ export const loginUser = async (email, password, role) => {
 
   const normalizedRole = role.toLowerCase();
 
-  const buildLocalUser = () => ({
-    id: `local-${Date.now()}`,
-    name: email.split("@")[0] || "Demo User",
-    email,
-    role: normalizedRole,
-    token: "local-demo-token",
-    demo: true,
-  });
-
+  let response;
   try {
-    const response = await API.post("/login", {
+    response = await API.post("/login", {
       email,
       password,
       role: normalizedRole,
     });
-    const { user, token } = response.data;
-
-    if (!user || !token) throw new Error("Invalid login response");
-
-    const userWithToken = { ...user, token };
-    localStorage.setItem("user", JSON.stringify(userWithToken));
-
-    return userWithToken;
   } catch (err) {
-    // If backend is unreachable, fall back to a local/demo login so UI stays usable
+    // err.response is absent only when no HTTP response arrived at all:
+    // server down, connection refused, DNS failure, CORS block, or timeout.
     if (!err.response) {
-      const localUser = buildLocalUser();
-      localStorage.setItem("user", JSON.stringify(localUser));
-      console.warn("Backend unreachable; using local demo login.");
-      return localUser;
+      throw new NetworkError(
+        "Cannot reach the FarmXChain server. Please check that the backend is running and try again.",
+      );
     }
 
-    // If backend responded, surface its message
-    throw new Error(err.response?.data?.message || "Login failed");
+    // The server answered. Surface its message so the user sees the real reason,
+    // e.g. "Invalid email or password!" or "Role mismatch for this account...".
+    throw new Error(
+      err.response?.data?.message || "Login failed. Please try again.",
+    );
   }
+
+  const { user, token } = response.data;
+
+  // A 200 without both fields means the contract is broken. Fail loudly rather
+  // than storing a half-built session that will 401 on every later request.
+  if (!user || !token) {
+    throw new Error("Invalid login response from server. Please try again.");
+  }
+
+  localStorage.setItem("token", token);
+
+  const userWithToken = { ...user, token };
+  localStorage.setItem("user", JSON.stringify(userWithToken));
+
+  return userWithToken;
 };
 
 // Register function (uses API)
@@ -102,22 +121,37 @@ export const registerUser = async (userData) => {
     const response = await API.post("/register", userData);
     return response.data.user || response.data;
   } catch (err) {
+    // ✅ SECURITY (P0-6): same distinction as login — a network failure must not
+    // be reported to the user as a validation problem.
+    if (!err.response) {
+      throw new NetworkError(
+        "Cannot reach the FarmXChain server. Please check that the backend is running and try again.",
+      );
+    }
     throw new Error(err.response?.data?.message || "Registration failed");
   }
 };
 
 // Logout function
+// ✅ P0-6: loginUser writes TWO keys ("token" and "user"). Both must be cleared,
+// or axiosInstance.js — which reads localStorage.getItem("token") — keeps sending
+// a valid JWT after the user has "logged out".
 export const logoutUser = () => {
   localStorage.removeItem("user");
+  localStorage.removeItem("token");
 };
 
-// Password reset: request link
+// Password reset: request link.
+// SECURITY: the server responds with a generic message only. The reset link is
+// delivered by email (or written to the server log in development) and is never
+// present in this response.
 export const requestPasswordReset = async (email) => {
   try {
     const res = await AUTH_API.post("/forgot-password", { email });
-    return res.data; // may contain { resetLink }
+    return res.data; // { message }
   } catch (err) {
-    // Still resolve to true to avoid email enumeration
+    // Swallow the error so a failed request is indistinguishable from a
+    // successful one — no email enumeration through the UI.
     return {
       message: "If this email is registered, a reset link has been sent.",
     };
@@ -149,7 +183,7 @@ export const getRetailerInventory = async () => {
     return response.data;
   } catch (err) {
     throw new Error(
-      err.response?.data?.message || "Failed to fetch retailer inventory"
+      err.response?.data?.message || "Failed to fetch retailer inventory",
     );
   }
 };
@@ -167,7 +201,7 @@ export const getFarmerProducts = async (farmerId) => {
       : response.data.products || [];
   } catch (err) {
     throw new Error(
-      err.response?.data?.message || "Failed to fetch farmer products"
+      err.response?.data?.message || "Failed to fetch farmer products",
     );
   }
 };
@@ -194,12 +228,8 @@ export const getAllProducts = async () => {
 export const getAvailableProductsForCustomers = async () => {
   try {
     console.log("[API] Calling /customer/products endpoint");
-    const response = await PRODUCTS_API.get("/customer/product");
+    const response = await PRODUCTS_API.get("/customer/products");
     console.log("[API] /customer/products response data:", response.data);
-    console.log(
-      "[API] /customer/products response length:",
-      Array.isArray(response.data) ? response.data.length : "not an array"
-    );
     if (Array.isArray(response.data)) {
       return response.data;
     }
@@ -208,7 +238,7 @@ export const getAvailableProductsForCustomers = async () => {
   } catch (err) {
     console.error("[API] /customer/products error:", err);
     throw new Error(
-      err.response?.data?.message || "Failed to fetch available products"
+      err.response?.data?.message || "Failed to fetch available products",
     );
   }
 };
