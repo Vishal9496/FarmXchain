@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import "../styles/DistributorDashboard.css";
 import { getAuthHeaders, isTokenValid } from "../utils/tokenUtils";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
 const DistributorDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -26,12 +27,9 @@ const DistributorDashboard = () => {
           return;
         }
 
-        const response = await fetch(
-          "http://localhost:8080/api/orders/distributor",
-          {
-            headers: getAuthHeaders(),
-          },
-        );
+        const response = await fetch(`${API_BASE}/api/orders/distributor`, {
+          headers: getAuthHeaders(),
+        });
 
         if (!response.ok) {
           setOrders([]);
@@ -58,7 +56,7 @@ const DistributorDashboard = () => {
           return;
         }
         const resp = await fetch(
-          "http://localhost:8080/api/products/retailer/inventory",
+          `${API_BASE}/api/products/retailer/inventory`,
           {
             headers: getAuthHeaders(),
           },
@@ -96,9 +94,9 @@ const DistributorDashboard = () => {
 
       let endpoint;
       if (newStatus === "Shipped") {
-        endpoint = `http://localhost:8080/api/orders/${orderId}/ship`;
+        endpoint = `${API_BASE}/api/orders/${orderId}/ship`;
       } else if (newStatus === "Fulfilled") {
-        endpoint = `http://localhost:8080/api/orders/${orderId}/deliver`;
+        endpoint = `${API_BASE}/api/orders/${orderId}/deliver`;
       } else {
         // Processing or other states not handled by backend yet
         return;
@@ -118,12 +116,9 @@ const DistributorDashboard = () => {
       }
 
       // Refresh orders after successful update
-      const ordersResponse = await fetch(
-        "http://localhost:8080/api/orders/distributor",
-        {
-          headers: getAuthHeaders(),
-        },
-      );
+      const ordersResponse = await fetch(`${API_BASE}/api/orders/distributor`, {
+        headers: getAuthHeaders(),
+      });
       const data = await ordersResponse.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch (error) {

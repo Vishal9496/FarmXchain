@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../../styles/editProduct.css";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
 function EditProductPage({ products, setProducts }) {
   const { id } = useParams();
@@ -68,7 +69,7 @@ function EditProductPage({ products, setProducts }) {
 
     // Update in state and localStorage
     const updatedProducts = products.map((p) =>
-      p.id.toString() === id ? updatedProduct : p
+      p.id.toString() === id ? updatedProduct : p,
     );
     setProducts(updatedProducts);
     localStorage.setItem("products", JSON.stringify(updatedProducts));
@@ -83,14 +84,11 @@ function EditProductPage({ products, setProducts }) {
       if (form.imageFile) formData.append("image", form.imageFile);
 
       try {
-        const res = await fetch(
-          `http://localhost:8080/api/products/edit/${id}`,
-          {
-            method: "PUT",
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData,
-          }
-        );
+        const res = await fetch(`${API_BASE}/api/products/edit/${id}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
 
         if (!res.ok) {
           console.warn("Backend update failed, but local update succeeded");
@@ -98,7 +96,7 @@ function EditProductPage({ products, setProducts }) {
       } catch (err) {
         console.warn(
           "Backend not available, using local storage only:",
-          err.message
+          err.message,
         );
       }
     }

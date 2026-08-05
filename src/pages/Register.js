@@ -5,6 +5,8 @@ import { Sprout, Tractor, Truck, Store, User, Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { FRONTEND_ROLE_OPTIONS } from "../constants/roles";
 
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+
 const Register = () => {
   const { isDark, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
@@ -27,18 +29,18 @@ const Register = () => {
       role.id === "farmer"
         ? Tractor
         : role.id === "distributor"
-        ? Truck
-        : role.id === "retailer"
-        ? Store
-        : User,
+          ? Truck
+          : role.id === "retailer"
+            ? Store
+            : User,
     color:
       role.id === "farmer"
         ? "from-amber-400 to-orange-500"
         : role.id === "distributor"
-        ? "from-blue-400 to-cyan-500"
-        : role.id === "retailer"
-        ? "from-purple-400 to-pink-500"
-        : "from-green-400 to-emerald-500",
+          ? "from-blue-400 to-cyan-500"
+          : role.id === "retailer"
+            ? "from-purple-400 to-pink-500"
+            : "from-green-400 to-emerald-500",
   }));
 
   const handleChange = (e) => {
@@ -74,8 +76,8 @@ const Register = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/users/register",
-        userData
+        `${API_BASE}/api/users/register`,
+        userData,
       );
 
       alert("Registration Success: " + response.data.message);
@@ -279,8 +281,8 @@ const Register = () => {
                               ? "border-emerald-500 bg-emerald-950"
                               : "border-emerald-500 bg-emerald-50"
                             : isDark
-                            ? "border-slate-700 bg-slate-800/50 hover:border-slate-600"
-                            : "border-gray-200 bg-white/50 hover:border-gray-300"
+                              ? "border-slate-700 bg-slate-800/50 hover:border-slate-600"
+                              : "border-gray-200 bg-white/50 hover:border-gray-300"
                         }`}
                       >
                         <div

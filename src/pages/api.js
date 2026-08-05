@@ -1,24 +1,26 @@
 import axios from "axios";
 
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 // Create a reusable secure Axios instance (attaches JWT token)
 export const API = axios.create({
-  baseURL: "http://localhost:8080/api/users",
+  baseURL: `${API_BASE}/api/users`,
 });
 
 // 🌟 NEW: Create a public Axios instance that does NOT attach the token
 // We use this for the analyze-image endpoint to bypass security conflicts.
 export const PUBLIC_API = axios.create({
-  baseURL: "http://localhost:8080/api/users",
+  baseURL: `${API_BASE}/api/users`,
 });
 
 // Auth endpoints (forgot/reset password)
 export const AUTH_API = axios.create({
-  baseURL: "http://localhost:8080/api/auth",
+  baseURL: `${API_BASE}/api/auth`,
 });
 
 // ✅ NEW: Product endpoints (with JWT token)
 export const PRODUCTS_API = axios.create({
-  baseURL: "http://localhost:8080/api/products",
+  baseURL: `${API_BASE}/api/products`,
 });
 
 // Attach token automatically if available
