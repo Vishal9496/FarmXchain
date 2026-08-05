@@ -39,7 +39,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+ System.out.println("===== JWT FILTER =====");
+System.out.println("Request URI: " + request.getRequestURI());
+System.out.println("Method: " + request.getMethod());
 
+if (request.getRequestURI().equals("/api/users/register")) {
+    System.out.println("Skipping JWT filter for register");
+    filterChain.doFilter(request, response);
+    return;
+}
         final String authHeader = request.getHeader("Authorization");
         String jwt = null;
         String email = null;
